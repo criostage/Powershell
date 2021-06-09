@@ -11,7 +11,9 @@ $SubscriptionName="SPE_E3"
 
 #Install-Module -Name ExchangeOnlineManagement
 New-Mailbox -MicrosoftOnlineServicesID $userUPN -Alias $alias -Name $displayName -Room -EnableRoomMailboxAccount $true -RoomMailboxPassword (ConvertTo-SecureString -String $password -AsPlainText -Force)
-    
+
+Start-Sleep -Seconds 60
+
 # Get the license Sku ID
 $License = New-Object -TypeName Microsoft.Open.AzureAD.Model.AssignedLicense
 $License.SkuId = (Get-AzureADSubscribedSku | Where-Object -Property SkuPartNumber -Value $SubscriptionName -EQ).SkuID

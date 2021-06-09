@@ -1,12 +1,19 @@
 ﻿Param(
-    [Parameter(Mandatory=$false)][INT]$BackupsToRetain = 30,
+    [Parameter(Mandatory=$false)][INT]$BackupsToRetain = 5,
     [Parameter(Mandatory=$false)][STRING]$ConfigFileSrcDirectory = "/cf/conf/backup/",
     [Parameter(Mandatory=$true)][STRING]$BackupDestDirectory,
     [Parameter(Mandatory=$true)][STRING]$ComputerName,
-    [Parameter(Mandatory=$true)][STRING]$Username = "admin",
+    [Parameter(Mandatory=$true)][STRING]$Username,
     [Parameter(Mandatory=$false)][STRING]$Password,
     [Parameter(Mandatory=$false)][SWITCH]$firstrun
 )
+
+# Issue:
+# VERBOSE: Using SSH Username and Password authentication for connection.
+# VERBOSE: Fingerprint for HOSTNAME: KEY
+# New-SFTPSession : Key exchange negotiation failed.
+#
+# Solution:# Get-SSHTrustedHost | Remove-SSHTrustedHost
 
 [Windows.Security.Credentials.PasswordVault,Windows.Security.Credentials,ContentType=WindowsRuntime] | Out-Null
 $VaultObj = New-Object Windows.Security.Credentials.PasswordVault 
@@ -27,6 +34,7 @@ switch($firstrun){
         if($Username){
             [SecureString]$Password = ConvertTo-SecureString -String (($VaultObj.Retrieve("$ComputerName",$UserName)) | Select-Object -First 1).Password -AsPlainText -Force
             [PSCredential]$Credencial = [PSCredential]::new($Username, $Password)
+            $omputerName
             New-SFTPSession -ComputerName $ComputerName -Credential $Credencial -Verbose -AcceptKey
             if( (Get-SFTPSession).connected -eq $true ){
                 $ConfigFiles = Get-SFTPChildItem -SessionId 0 -Path $ConfigFileSrcDirectory | Where-Object {$_.FullName -like "*$ConfigFileFormat"} | Sort-Object LastWriteTime | Select-Object -Last 1
