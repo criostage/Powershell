@@ -1,0 +1,11 @@
+Try{
+    Get-AppxPackage -Name "MicrosoftTeams" -AllUsers | Remove-AppxPackage -AllUsers 
+    Get-AppXProvisionedPackage -Online | Where {$_.DisplayName -eq "MicrosoftTeams"} | Remove-AppxProvisionedPackage -Online
+    Write-Host "Built-In Teams Chat app uninstalled"
+    Exit 0
+}
+catch {
+    $errMsg = $_.Exception.Message
+    return $errMsg
+    Exit 1
+}
